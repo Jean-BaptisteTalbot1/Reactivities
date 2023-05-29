@@ -6,17 +6,10 @@ namespace API.Controllers
 {
     public class ActivitiesController : BaseApiController
     {
-        private readonly IMediator _mediator;
-
-        public ActivitiesController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
         [HttpGet] //api/activities
         public async Task<ActionResult<List<Activity>>> GetActivities()
         {
-            return await _mediator.Send(new Application.Activities.List.Query());
+            return await Mediator.Send(new Application.Activities.List.Query());
         }
 
         [HttpGet("{id}")] //api/activities/id
@@ -37,5 +30,12 @@ namespace API.Controllers
             activity.Id = id;
             return Ok(await Mediator.Send(new Application.Activities.Edit.Command{Activity = activity}));
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteActivity(Guid id)
+        {
+            return Ok(await Mediator.Send(new Application.Activities.Delete.Command{Id = id}));
+        }
+
     }
 }
