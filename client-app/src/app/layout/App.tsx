@@ -1,9 +1,10 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container } from 'semantic-ui-react';
 import { Activity } from '../models/activity';
 import NavBar from './NavBar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
+import {v4 as uuid} from 'uuid';
 
 function App() {
   
@@ -17,16 +18,16 @@ function App() {
     })
   }, []) // To only toggle once the useEffect, we need to add dependency with the []
 
-  function handlerSelectActivity(id: string){
+  function handleSelectActivity(id: string){
     setSelectedActivity(activities.find(x => x.id === id));
   }
 
-  function handlerCancelSelectActivity() {
+  function handleCancelSelectActivity() {
     setSelectedActivity(undefined);
   }
 
   function handleFormOpen(id?: string){
-    id ? handlerSelectActivity(id) : handlerCancelSelectActivity();
+    id ? handleSelectActivity(id) : handleCancelSelectActivity();
     setEditMode(true);
   }
 
@@ -34,6 +35,20 @@ function App() {
     setEditMode(false);
   }
 
+  // Checks if there is an existing activity (if the passed activity has an id, it exists, else it is created)
+  // And after that, the edit mode is disabled and the new activity is selected
+  function handleCreateOrEditActivity(activity: Activity){
+    activity.id 
+    ? setActivities([...activities.filter(x => x.id !== activity.id), activity])
+    : setActivities([...activities, {...activity, id: uuid()}]); // The uuid() creates a new and unique Guid
+    setEditMode(false);
+    setSelectedActivity(activity);
+  }
+
+  function handleDeleteActivity(id: string)
+  {
+    setActivities([...activities.filter(x => x.id !== id)])
+  }
 
   // Empty tags (<> </> are the same as <Fragment></Fragment>)
   return (
@@ -43,11 +58,13 @@ function App() {
         <ActivityDashboard 
           activities={activities}
           selectedActivity={selectedActivity}
-          selectActivity={handlerSelectActivity}
-          cancelSelectActivity={handlerCancelSelectActivity}
+          selectActivity={handleSelectActivity}
+          cancelSelectActivity={handleCancelSelectActivity}
           editMode={editMode}
           openForm={handleFormOpen}
           closeForm={handleFormClose}
+          createOrEdit={handleCreateOrEditActivity}
+          deleteActivity={handleDeleteActivity}
         />
       </Container>
     </>
