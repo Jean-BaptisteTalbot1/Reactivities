@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Container } from 'semantic-ui-react';
 import { Activity } from '../models/activity';
 import NavBar from './NavBar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
 import {v4 as uuid} from 'uuid';
+import agent from '../api/agent';
 
 function App() {
   
@@ -13,10 +13,19 @@ function App() {
   const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
-    axios.get<Activity[]>('http://localhost:5000/api/activities/GetActivities').then(response => {
-      setActivities(response.data);
+    agent.Activities.list().then(response => {
+
+      // Creates a new activities array and parse the date before pushing the response to the used array (temporary solution)
+      let activities: Activity[] = [];
+      response.forEach(activity => {
+        activity.date = activity.date.split('T')[0];
+        activities.push(activity);
+      })
+
+      setActivities(activities);
     })
-  }, []) // To only toggle once the useEffect, we need to add dependency with the []
+  }, [])
+  // To only toggle once the useEffect, we need to add dependency with the []
 
   function handleSelectActivity(id: string){
     setSelectedActivity(activities.find(x => x.id === id));
