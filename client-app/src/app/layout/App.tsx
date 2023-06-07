@@ -1,18 +1,25 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Container } from 'semantic-ui-react';
 import NavBar from './NavBar';
 import { observer } from 'mobx-react-lite';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import HomePage from '../../features/Home/HomePage';
 
 function App() 
 {
+  const location = useLocation();
+
   // Empty tags (<> </> are the same as <Fragment></Fragment>)
   return (
     <> 
-      <NavBar />
-      <Container style={{marginTop: '7em'}}>
-        <Outlet />
-      </Container>
+      {location.pathname === '/' ? <HomePage/> : (
+        <>
+          <NavBar />
+          <Container style={{marginTop: '7em'}}>
+            <Outlet />
+          </Container>
+        </>
+      )}
     </>
   );
 
