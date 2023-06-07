@@ -10,7 +10,6 @@ export default observer (function ActivityList() {
     const {groupedActivities} = activityStore;
     
      return (
-
         <>
             {groupedActivities.map(([group, activities]) => 
             (
@@ -18,16 +17,11 @@ export default observer (function ActivityList() {
                     <Header sub color='teal'>
                         {group}
                     </Header>
-                    <Segment style={{width: '60%'}}>
-                        <Item.Group divided >
-                            {activities.map(activity => (
-                                <ActivityListItem key={activity.id} activity={activity}/>
-                            ))}
-                        </Item.Group>
-                    </Segment>
+                    {activities.map(activity => (
+                        <ActivityListItem key={activity.id} activity={activity}/>
+                    ))}
                 </Fragment>
             ))}
         </>
-
-        )
+    )
 })
