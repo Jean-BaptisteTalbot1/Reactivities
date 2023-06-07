@@ -1,112 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Container } from 'semantic-ui-react';
-import { Activity } from '../models/activity';
 import NavBar from './NavBar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
-import {v4 as uuid} from 'uuid';
-import agent from '../api/agent';
 import LoadingComponent from './LoadingComponent';
+import { useStore } from '../stores/store';
+import { observer } from 'mobx-react-lite';
 
-function App() {
-  
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | undefined> (undefined); // The pipe tells that the initial state could also be undefined
-  const [editMode, setEditMode] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+function App() 
+{
+  const { activityStore } = useStore();
 
-  useEffect(() => {
-    agent.Activities.list().then(response => {
+  useEffect(() => { 
+    activityStore.loadActivities();
+  }, [activityStore])
 
-      // Creates a new activities array and parse the date before pushing the response to the used array (temporary solution)
-      let activities: Activity[] = [];
-      response.forEach(activity => {
-        activity.date = activity.date.split('T')[0];
-        activities.push(activity);
-      })
 
-      setActivities(activities);
-      setLoading(false);
-    })
-  }, [])
-  // To only toggle once the useEffect, we need to add dependency with the []
-
-  function handleSelectActivity(id: string){
-    setSelectedActivity(activities.find(x => x.id === id));
-  }
-
-  function handleCancelSelectActivity() {
-    setSelectedActivity(undefined);
-  }
-
-  function handleFormOpen(id?: string){
-    id ? handleSelectActivity(id) : handleCancelSelectActivity();
-    setEditMode(true);
-  }
-
-  function handleFormClose() {
-    setEditMode(false);
-  }
-
-  // Checks if there is an existing activity (if the passed activity has an id, it exists, else it is created)
-  // And after that, the edit mode is disabled and the new activity is selected
-  function handleCreateOrEditActivity(activity: Activity)
-  {
-      setSubmitting(true);
-
-      if (activity.id)
-      {
-        agent.Activities.update(activity).then(() => { 
-          setActivities([...activities.filter(x => x.id !== activity.id), activity]) 
-          setSelectedActivity(activity);
-          setEditMode(false);
-          setSubmitting(false);
-        })
-      } 
-      else 
-      {
-        activity.id = uuid();
-        agent.Activities.create(activity).then(() => { 
-          setActivities([...activities, activity]); 
-          setSelectedActivity(activity);
-          setEditMode(false);
-          setSubmitting(false);
-        })
-      }
-  }
-
-  function handleDeleteActivity(id: string)
-  {
-    setSubmitting(true);
-    agent.Activities.delete(id).then(() => {
-      setActivities([...activities.filter(x => x.id !== id)])
-      setSubmitting(false);
-    })
-  }
-
-  if (loading) return <LoadingComponent content='Loading app'/>
+  if (activityStore.loadingInitial) return <LoadingComponent content='Loading app'/>
   
   // Empty tags (<> </> are the same as <Fragment></Fragment>)
   return (
     <> 
-      <NavBar openForm={handleFormOpen}/>
+      <NavBar />
       <Container style={{marginTop: '7em'}}>
-        <ActivityDashboard 
-          activities={activities}
-          selectedActivity={selectedActivity}
-          selectActivity={handleSelectActivity}
-          cancelSelectActivity={handleCancelSelectActivity}
-          editMode={editMode}
-          openForm={handleFormOpen}
-          closeForm={handleFormClose}
-          createOrEdit={handleCreateOrEditActivity}
-          deleteActivity={handleDeleteActivity}
-          submitting={submitting}
-        />
+        <ActivityDashboard />
       </Container>
     </>
- );
+  );
 
 }
-// Can you describe me the previous code please?
-export default App;
+// Can you describe me the previous code please ?
+export default observer(App);
