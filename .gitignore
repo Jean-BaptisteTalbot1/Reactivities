@@ -480,3 +480,9 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+
+# Removing db from git repo
+*db
+*db-wal
+*db-shm
