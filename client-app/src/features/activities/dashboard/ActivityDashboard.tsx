@@ -1,26 +1,31 @@
 import { Grid } from "semantic-ui-react";
 import ActivityList from "./ActivityList";
-import ActivityDetails from "../details/ActivityDetails";
-import ActivityForm from "../form/ActivityForm";
 import { useStore } from "../../../app/stores/store";
 import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
+import LoadingComponent from "../../../app/layout/LoadingComponent";
 
-// export default function ActivityDashboard(props : Props) { // Same as the next line but we need to use props.activities.map....
-    export default observer (function ActivityDashboard() 
-    {
-        const { activityStore } = useStore();
-        const { selectedActivity, editMode } = activityStore;                               
-        
-        return (
-            <Grid width='25%'>
+export default observer (function ActivityDashboard() 
+{
+    const { activityStore } = useStore();
+    const {loadActivities, activityRegistry} = activityStore;
+
+    useEffect(() =>         { 
+        if (activityRegistry.size <= 1) loadActivities();
+    }, [activityRegistry.size, loadActivities])
+    
+    if (activityStore.loadingInitial) return <LoadingComponent content='Loading app'/>
+
+    return (
+        <Grid width='25%'>
+            {/* First column */}
+            <Grid.Column width='11'>
                 <ActivityList />
-                <Grid.Column width='6'>
-                    {/* The && tells to execute only if the passed argument isn't null or undefined. Otherwise */}
-                    {selectedActivity && !editMode && 
-                    <ActivityDetails />}
-                    {editMode &&
-                    <ActivityForm />}
-                </Grid.Column>
-            </Grid>
-        )
+            </Grid.Column>
+            {/* Second column */}
+            <Grid.Column width='5'>
+                <h2>Activities filter</h2>
+            </Grid.Column>
+        </Grid>
+    )
 })
