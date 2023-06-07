@@ -22,7 +22,7 @@ export default class ActivityStore {
                 activity.date = activity.date.split('T')[0];
                 this.activities.push(activity);
             })
-            this.loadingInitial = false;
+            this.setLoadingInitial(false);
         } catch (error) {
             console.log(error);
             this.setLoadingInitial(false);
@@ -78,6 +78,25 @@ export default class ActivityStore {
                 this.activities = [...this.activities.filter(a => a.id !== activity.id), activity];
                 this.selectedActivity = activity;
                 this.editMode = false;
+                this.loading = false;
+            })
+        } catch (error) {
+            console.log(error);
+            runInAction(() => {
+                this.loading = false;
+            })
+        }
+    }
+
+    deleteActivity = async (id: string) => {
+        this.loading = true;
+        try {
+            await agent.Activities.delete(id);
+            runInAction(() => {
+                // Filter and keep only the activities different than the passed id (delete the selected one)
+                this.activities = [...this.activities.filter(a => a.id !== id)];
+                // If the selected activity is the deleted one, calls cancel to unselect it from the view panel
+                if (this.selectedActivity?.id === id) this.cancelSelectedActivity();
                 this.loading = false;
             })
         } catch (error) {
